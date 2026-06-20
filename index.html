@@ -70,10 +70,10 @@
     cursor: pointer;
   }
   .small-btn:active { background: var(--surface-2); }
-  #status { font-size: 12px; color: var(--text-secondary); text-align: center; margin-top: 12px; min-height: 16px; }
+  #status { font-size: 12px; color: var(--text-secondary); text-align: center; margin: 12px 0 1rem; min-height: 16px; }
   #install-banner {
     display: none; background: var(--surface-2); border-radius: var(--radius-md);
-    padding: 10px 14px; font-size: 13px; margin-bottom: 1rem; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 10px 14px; font-size: 13px; margin-top: 1rem; align-items: center; justify-content: space-between; gap: 8px;
   }
   #install-banner button { background: var(--accent); color: #fff; border: none; border-radius: var(--radius-md); padding: 6px 12px; font-size: 13px; }
   svg.icon { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -85,11 +85,6 @@
   <div id="header">
     <h1>Art<span>ackumulering</span></h1>
     <select id="plot-select"></select>
-  </div>
-
-  <div id="install-banner">
-    <span>Installera som app på hemskärmen</span>
-    <button id="install-btn">Installera</button>
   </div>
 
   <div class="stat-row">
@@ -111,11 +106,6 @@
     </div>
   </div>
 
-  <div id="chart-card">
-    <div class="chart-label">Artackumulering</div>
-    <div id="chart-wrap"><canvas id="accChart" role="img" aria-label="Artackumuleringskurva i realtid"></canvas></div>
-  </div>
-
   <button id="big-btn">
     <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
     Ny art funnen
@@ -129,6 +119,16 @@
   </div>
 
   <div id="status">Tryck på knappen för att starta inventeringen.</div>
+
+  <div id="chart-card">
+    <div class="chart-label">Artackumulering</div>
+    <div id="chart-wrap"><canvas id="accChart" role="img" aria-label="Artackumuleringskurva i realtid"></canvas></div>
+  </div>
+
+  <div id="install-banner">
+    <span>Installera som app på hemskärmen</span>
+    <button id="install-btn">Installera</button>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
