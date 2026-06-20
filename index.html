@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0F6E56">
+<title>Artackumulering – fältapp</title>
+<meta name="description" content="Logga artfynd i fält och se artackumuleringskurvan och fyndfrekvensen i realtid.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+  :root {
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --surface-2: #f1f0eb;
+    --text-primary: #1a1a18;
+    --text-secondary: #6b6a64;
+    --border: rgba(0,0,0,0.12);
+    --accent: #0F6E56;
+    --accent-light: #5DCAA5;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #18181a;
+      --surface: #232325;
+      --surface-2: #2c2c2e;
+      --text-primary: #f0f0ee;
+      --text-secondary: #9a9a96;
+      --border: rgba(255,255,255,0.14);
+      --accent: #5DCAA5;
+      --accent-light: #1D9E75;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    -webkit-tap-highlight-color: transparent;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  #app { padding: 1rem; max-width: 480px; margin: 0 auto; }
+  #header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-top: env(safe-area-inset-top); }
+  #header h1 { font-size: 17px; font-weight: 600; }
+  #header h1 span { color: var(--accent); }
+  #plot-select { font-size: 13px; color: var(--text-secondary); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 6px 10px; max-width: 130px; }
+  .stat-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 1rem; }
+  .stat { background: var(--surface-2); border-radius: var(--radius-md); padding: 0.75rem 1rem; }
+  .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
+  .stat-value { font-size: 22px; font-weight: 600; }
+  .stat-unit { font-size: 12px; color: var(--text-secondary); margin-left: 2px; font-weight: 400; }
+  .chart-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+  #chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 0.75rem; margin-bottom: 1rem; }
+  #chart-wrap { position: relative; width: 100%; height: 280px; }
+  .row-btns:has(> :only-child) { grid-template-columns: 1fr; }
+  #big-btn {
+    width: 100%; padding: 1.15rem; font-size: 19px; font-weight: 600;
+    border-radius: var(--radius-lg); border: none; background: var(--accent);
+    color: #fff; cursor: pointer; transition: transform 0.08s, opacity 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  #big-btn:active { transform: scale(0.98); opacity: 0.9; }
+  .row-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .small-btn {
+    padding: 0.6rem; font-size: 13px; border-radius: var(--radius-md);
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary);
+    cursor: pointer;
+  }
+  .small-btn:active { background: var(--surface-2); }
+  #status { font-size: 12px; color: var(--text-secondary); text-align: center; margin-top: 12px; min-height: 16px; }
+  #install-banner {
+    display: none; background: var(--surface-2); border-radius: var(--radius-md);
+    padding: 10px 14px; font-size: 13px; margin-bottom: 1rem; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  #install-banner button { background: var(--accent); color: #fff; border: none; border-radius: var(--radius-md); padding: 6px 12px; font-size: 13px; }
+  svg.icon { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="header">
+    <h1>Art<span>ackumulering</span></h1>
+    <select id="plot-select"></select>
+  </div>
+
+  <div id="install-banner">
+    <span>Installera som app på hemskärmen</span>
+    <button id="install-btn">Installera</button>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-label">Antal arter</div>
+      <div class="stat-value" id="stat-count">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Tid i ytan</div>
+      <div class="stat-value" id="stat-time">0<span class="stat-unit">min</span></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Senaste intervall</div>
+      <div class="stat-value" id="stat-last">–</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Fynd / min (nu)</div>
+      <div class="stat-value" id="stat-rate">–</div>
+    </div>
+  </div>
+
+  <div id="chart-card">
+    <div class="chart-label">Artackumulering</div>
+    <div id="chart-wrap"><canvas id="accChart" role="img" aria-label="Artackumuleringskurva i realtid"></canvas></div>
+  </div>
+
+  <button id="big-btn">
+    <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    Ny art funnen
+  </button>
+  <div class="row-btns">
+    <button class="small-btn" id="undo-btn">Ångra senaste</button>
+    <button class="small-btn" id="new-plot-btn">Ny provyta</button>
+  </div>
+  <div class="row-btns">
+    <button class="small-btn" id="reset-btn">Rensa denna yta</button>
+  </div>
+
+  <div id="status">Tryck på knappen för att starta inventeringen.</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
