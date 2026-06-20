@@ -264,36 +264,12 @@
   let deferredPrompt = null;
   const banner = document.getElementById("install-banner");
   const installBtn = document.getElementById("install-btn");
-  const installText = document.getElementById("install-text");
-
-  const isStandalone =
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true;
-
-  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-
-  function showManualInstallBanner() {
-    if (isStandalone) return;
-    installText.textContent = isIos
-      ? "Lägg till på hemskärmen: tryck på Dela-ikonen och välj \"Lägg till på hemskärmen\""
-      : "Installera som app: öppna webbläsarmenyn (⋮) och välj \"Installera app\" eller \"Lägg till på hemskärmen\"";
-    installBtn.style.display = "none";
-    banner.style.display = "flex";
-  }
 
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    installText.textContent = "Installera som app på hemskärmen";
-    installBtn.style.display = "inline-block";
     banner.style.display = "flex";
   });
-
-  // Om webbläsaren inte skickar beforeinstallprompt (redan tillfrågad tidigare,
-  // eller webbläsare utan stöd som Safari), visa ändå banner med manuella instruktioner
-  setTimeout(() => {
-    if (!deferredPrompt && !isStandalone) showManualInstallBanner();
-  }, 2000);
 
   installBtn.addEventListener("click", async () => {
     if (!deferredPrompt) return;
